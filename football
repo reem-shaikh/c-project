@@ -1,0 +1,492 @@
+SOURCE CODE
+
+#include<fstream.h>
+#include<conio.h>
+#include<iomanip.h>
+#include<string.h>
+#include<stdio.h>
+class  player
+{ static int pcode;
+  char name[20], team[20], country[20];
+  int pno, pid;
+  float ng, shots, scoreper;
+  public:
+  player()
+  {ng=0;
+  shots=0;}
+  void getdata();
+  void showdata();
+  char* getteam() {return team;}
+  char* getname() {return name;}
+  int getpno() {return pno;}
+  int getpid() {return pid;}
+  float getscorep() {return scoreper;}
+ };
+  int player::pcode=0;
+
+  void player :: getdata()
+  { 
+    cout<<"\n Enter the name"; cin>>name;
+    cout<<"    the country"; cin>>country;
+    cout<<"    the team"; cin>>team;
+    cout<<"    the pno"; cin>>pno;
+    cout<<"    the no. of goals"; cin>>ng;
+    cout<<"    the shots on the goal"; cin>>shots;
+    player P;
+
+    ifstream fin("team.dat");
+    while(fin.read((char*)&P, sizeof P))
+	if((strcmp(P.getteam(),team)==0)&&(P.getpno()==pno))
+	  {cout<<"Entry is invalid, enter different values for team or pno."<<endl;
+	   cout<<"Enter the team"; cin>>team;
+	   cout<<endl<<" the pno"; cin>>pno;
+	  } 
+    scoreper=(ng/shots)*100;
+    pcode++;
+    pid=pcode;
+     }
+
+  void player ::showdata()
+  { cout<<endl<<setw(8)<<name<<setw(8)<<team<<setw(10)<<country;
+    cout<<setw(10)<<pno<<setw(15)<<ng<<setw(5)<<shots;
+    cout<<setw(15)<<scoreper<< " % "<<setw(5)<<pid<<endl;
+    }
+
+  void insert()
+  { player P;
+    int n,i;
+    ofstream fout("Football.dat");
+    cout<<"\n Enter the no. of players you want to insert";
+    cin>>n;
+    ofstream f1("team.dat");
+    for(i=0;i<n;i++)
+     { P.getdata();
+       fout.write((char*)&(P),sizeof(P));
+       f1.write((char*)&(P),sizeof(P));
+       }
+      fout.close();
+      f1.close();
+    }
+
+
+
+//ADMIN FUNCTIONS
+
+  void append()
+   { player P;
+     int n,i;
+     fstream f1("Football.dat",ios::app);
+     fstream f2("team.dat",ios::app);
+     cout<<"\n Enter the number of records";
+     cin>>n;
+     for(i=0;i<n;i++)
+       { P.getdata();
+	 f1.write((char*)&(P),sizeof(P));
+	  f2.write((char*)&(P),sizeof(P));
+       }
+    f1.close();
+    f2.close();
+   }
+
+void update()
+  {  player P;
+    ifstream fin("Football.dat");
+    ofstream fout("temp.dat");
+     int spid,flag=0;
+     char ch;
+     cout<<"\n Enter the pid to update"<<endl;
+     cin>>spid;    
+    while(fin.read((char*)&P,sizeof P))
+     {
+	if(P.getpid()==spid)
+ { cout<<endl<<setw(8)<<"  Name "<<setw(8)<<" team " <<setw(10)<<"country ";
+	   cout<<setw(10)<<" pno"<<setw(15)<<"no. of goals"<<setw(5)<<" shots";
+	   cout<<setw(15)<<"  score %"<<setw(5)<<" Pid"<<endl;
+	    P.showdata();
+	    cout<<"\n Is this the player to update ( Enter y/n)"<<endl;
+	    cin>>ch; flag=1;
+	    if(ch=='y'||ch=='Y')
+	     { P.getdata();
+	       fout.write((char*)&P,sizeof P);
+	      }
+	  }
+	   else
+	    fout.write((char*)&P,sizeof P);
+	}
+       if(flag==0)
+	 cout<<"\n Player not found \n";
+	 fin.close();
+	 fout.close();
+	 remove("Football.dat");
+	 rename("temp.dat","Football.dat");
+     }
+
+  void del()
+   { getch();
+     clrscr();
+     player P;
+     ifstream fin("Football.dat");
+     ofstream f1("temp.dat");
+     ofstream f2("retired.dat",ios::app);
+     int spid;
+     cout<<"\n Enter the Player id to be deleted"<<endl;
+     cin>>spid;
+     while(fin.read((char*)&(P),sizeof(P)))
+    { if(P.getpid()!=spid)
+	 f1.write((char*)&(P),sizeof( P));
+	else
+    { cout<<endl<<setw(8)<<"  Name "<<setw(8)<<" team "<<setw(10)<<"country ";
+	   cout<<setw(10)<<" pno"<<setw(15)<<"no. of goals"<<setw(5)<<" shots";
+	   cout<<setw(15)<<"  score %"<<setw(5)<<" Pid"<<endl;
+	   P.showdata();
+	   f2.write((char*)&(P),sizeof(P));
+	 }
+     }
+	 fin.close();
+	 f1.close();
+	 f2.close();
+	 remove("Football.dat");
+	 rename("temp.dat","Football.dat");
+       }
+
+
+
+
+
+
+
+
+
+
+
+//Viewer functions
+    void display()
+    { player P;
+      getch();
+      clrscr();
+      ifstream fin("Football.dat");
+   cout<<endl<<setw(8)<<"  Name: "<<setw(8)<<" team: "<<setw(10)<<"country: ";
+      cout<<setw(10)<<" pno:"<<setw(15)<<"no. of goals:"<<setw(5)<<" shots";
+      cout<<setw(15)<<"  score %:"<<setw(5)<<" Pid:"<<endl;
+       while(fin.read((char*)&P,sizeof P))
+	    P.showdata();
+       getch();
+       fin.close();
+      }
+  void team_pno()
+   { getch();
+     clrscr();
+     player P, P1[30], temp;
+     int i,j,k=0,flag=0;
+     char steam[20];
+     cout<<"\n Enter the team you want"<<endl;
+     cin>>steam;
+     ifstream fin("Football.dat");
+     while(fin.read((char*)&P,sizeof P))
+	if(strcmp(P.getteam(),steam)==0)
+	 {P1[k++]=P;
+	  flag=1;}
+	fin.close();
+      for(i=0;i<k-1;i++)
+       for(j=0;j<k-1-i;j++)
+	 { if(P1[j].getpno()>P1[j+1].getpno())
+	      {  temp=P1[j];
+		 P1[j]=P1[j+1];
+		 P1[j+1]=temp;}
+	      }
+	cout<<endl;
+     if( flag==0)
+      cout<<"\n Team not found"<<endl;
+    else
+     {  cout<<"Array is sorted press any key to display \n "<<endl;
+	getch();
+	cout<<endl;
+	cout<<setw(20)<<"Player number"<<setw(20)<<" Name"<<endl;
+	cout<<endl;
+	for(i=0;i<k;i++)
+	cout<<setw(20)<<P1[i].getpno()<<setw(20)<<P1[i].getname()<<endl;
+    }  
+ getch(); }
+
+  void scorep()
+    { getch();
+      clrscr();
+     player P,P1[30],temp;
+     int i,j,k=0;
+     ifstream fin("Football.dat");
+    while(fin.read((char*)&P,sizeof P))
+	  P1[k++]=P;
+    fin.close();
+    for(i=0;i<k-1;i++)
+       for(j=0;j<k-1-i;j++)
+	 { if(P1[j].getscorep()>P1[j+1].getscorep())
+	      {  temp=P1[j];
+		 P1[j]=P1[j+1];
+		 P1[j+1]=temp;}
+		 }
+      cout<<"Array is sorted press any key to display"<<endl;
+      getch();
+cout<<setw(20)<<" Name"<<setw(20)<<"Player number"<<setw(20)<<  " Score   %"<<endl;
+ for(i=0;i<k;i++)
+ cout<<setw(20)<<P1[i].getname()<<setw(20)<<P1[i].getpno()<<setw(20)       <<P1[i].getscorep()<<endl;
+      } 
+ void top3()
+   { getch();
+     clrscr();
+    player P,P1[30],temp;
+     int i,j,k=0;
+     ifstream fin("Football.dat");
+      while(fin.read((char*)&P,sizeof P))
+	  P1[k++]=P;
+      fin.close();
+      for(i=0;i<k-1;i++)
+       for(j=0;j<k-1-i;j++)
+	 { if(P1[j].getscorep()>P1[j+1].getscorep())
+	      {  temp=P1[j];
+		 P1[j]=P1[j+1];
+		 P1[j+1]=temp;}
+		 }
+     cout<<"The top 3 players are:"<<endl;
+     getch();
+   cout<<setw(20)<<"Name"<<setw(20)<<"  Team"<<setw(20)<<" Score %"<<endl;
+     for(i=k-1;i>k-4;i--)
+cout<<k-i<<setw(20)<<P1[i].getname()<<setw(20)<<P1[i].getteam()<<setw(20)<<
+P1[i].getscorep()<<endl;
+       getch();
+   }
+
+  void compare()
+   { getch();
+     clrscr();
+     player P;
+     ifstream fin("Football.dat");
+     float total1,total2;
+     char team1[20],team2[20];
+     cout<<"Enter the teams which are playing "<<endl;
+     cout<<"Team 1 :"; cin>>team1;
+     cout<<"Team 2 :"; cin>>team2;
+    while(fin.read((char*)&P,sizeof P))
+	{ if(strcmpi(P.getteam(),team1)==0)
+	    total1+=P.getscorep();
+	  else if(strcmpi(P.getteam(),team2)==0)
+		  total2+=P.getscorep();
+	 }
+     if(total1>total2)
+	cout<<" Team "<<team1<<"   Will win "<<endl;
+     else
+	cout<<" Team "<<team2<<"   Will win "<<endl;
+
+	 fin.close();
+	  getch();
+     }
+
+   void best()
+    { getch();
+     clrscr();
+     player P,P1[30];
+     int i,j,k=0,flag=0,p=0;
+     float max=0;
+     char steam[20];
+     cout<<"Enter the team you want"<<endl;
+     cin>>steam;
+     ifstream fin("team.dat");
+     while(fin.read((char*)&P,sizeof P))
+	if(strcmpi(P.getteam(),steam)==0)
+	 {P1[k++]=P;
+	  flag=1;}
+      fin.close();
+      for(i=0;i<k;i++)
+	 if(P1[i].getscorep()>max)
+	      {  max=P1[i].getscorep();
+		 p=i;}
+     if (flag==0)
+       cout<<" Team not found";
+
+     else
+      { cout<<"The Best player in the team is  "<<endl;
+       getch();
+ cout<<setw(20)<<"Player number"<<setw(20)<<"Name "<<setw(20)<<" Score %"<<endl; cout<<setw(20)<<P1[p].getpno()<<setw(20)<<P1[p].getname()<<setw(20)<<P1[p].getscorep()<<endl;
+       getch();
+      }
+  }
+
+  void Tbest()
+  {  getch();
+     clrscr();
+     player P;
+     int n,i,p=0;
+     char team[10][20];
+     float total[10],max=0;
+     cout<<"Enter the number of teams you want to compare";
+     cin>>n;
+     cout<<"Enter the teams to compare "<<endl;
+     for(i=0;i<n;i++)
+     cin>>team[i];
+     ifstream fin("Football.dat");
+     for(i=0;i<n;i++)
+    {  while(fin.read((char*)&P,sizeof P))
+	{ if(strcmpi(P.getteam(),team[i])==0)
+	    total[i]+=P.getscorep();
+	 }
+      for(i=0;i<n;i++)
+	 if(total[i]>max)
+	      {  p=i;}
+     cout<<"Team"<<team[p]<<" is the best team"<<endl ;
+	 fin.close();
+	  getch();
+     }
+   }
+  void oneplayer()
+   { getch();
+    clrscr();
+    player P;
+     ifstream fin("Football.dat");
+     int spid,flag=0;
+     char sname[20];
+     cout<<"Enter the pid and name to display"<<endl;
+     cin>>spid>>sname;
+    while(fin.read((char*)&P,sizeof P))
+     { if((P.getpid()==spid)&&strcmpi(P.getname(),sname)==0)
+	  {  flag=1;
+	    break;}
+	 else
+	    flag=0;
+     }
+   if(flag==1)
+{ cout<<endl<<setw(8)<<"  Name: "<<setw(8)<<" team: "<<setw(10)<<"country: ";
+      cout<<setw(10)<<" pno:"<<setw(15)<<"no. of goals:"<<setw(5)<<" shots";
+      cout<<setw(15)<<"  score %:"<<setw(5)<<" Pid:"<<endl;
+     P.showdata();
+   }
+   else
+   cout<<"Player not found"<<endl;
+  fin.close();
+     }
+
+  void retired()
+   {  getch();
+      clrscr();
+      player P;
+      ifstream fin("retired.dat");
+   cout<<endl<<setw(8)<<"  Name: "<<setw(8)<<" team: "<<setw(10)<<"country: ";
+      cout<<setw(10)<<" pno:"<<setw(15)<<"no. of goals:"<<setw(5)<<" shots";
+      cout<<setw(15)<<"  score %:"<<setw(5)<<" Pid:"<<endl;
+
+	while(fin.read((char*)&P,sizeof P))
+		P.showdata();
+    getch();
+   fin.close();
+    }
+
+  void viewer()
+   { getch();
+     clrscr();
+     int ch;
+      do
+	{ cout<<"\n 1.All players";
+	  cout<<"\n 2.Team list ";
+	  cout<<"\n 3.All players according to score percent";
+	  cout<<"\n 4.Top 3 players";
+	  cout<<"\n 5.Which team will win the next match";
+	  cout<<"\n 6.Best player in a team";
+	  cout<<"\n 7.The best team";
+	  cout<<"\n 8.Details of one player";
+	  cout<<"\n 9.Retired players";
+	  cout<<"\n 10.Leave";
+	  cout<<"\n Enter your choice: ";
+	  cin>>ch;
+	  switch(ch)
+		  { case 1:display();
+			    break;
+
+		    case 2:team_pno();
+			    break;
+
+		    case 3:scorep();
+			     break;
+
+		    case 4:top3();
+			    break;
+
+		    case 5:compare();
+			      break;
+
+		    case 6:best();
+			    break;
+
+		    case 7:Tbest();
+			    break;
+
+		    case 8:oneplayer();
+			     break;
+
+		    case 9:retired();
+			    break;
+		    case 10: break;
+		    }
+	 }while(ch<10);
+  }
+   void admin ()
+   { getch();
+     clrscr();
+     char susername[20],pass[20];
+     int ch;
+     cout<<"Username"; cin>>susername;
+     cout<<"Password"; cin>>pass;
+     if((strcmpi(susername,"admin")==0)&&(strcmpi(pass,"juice123")==0))
+	{ cout<<"Welcome back Admin"<<endl;
+	  getch();
+	 cout<<"1.Insert the details of all players"<<endl;
+	 insert();
+	  do
+	   { cout<<"1.Insert a player"<<endl;
+	     cout<<"2.Update a player"<<endl;
+	     cout<<"3.Delete a player "<<endl;
+	     cout<<"4.General choices"<<endl;
+	     cout<<"5.Exit"<<endl;
+	     cout<<"Enter your choice"<<endl;
+	     cin>>ch;
+		switch(ch)
+			{ case 1 : append();
+				   break;
+
+			  case 2 : update();
+				   break;
+
+			  case 3 : del();
+				   break;
+
+			  case 4 : viewer();
+				   break;
+			  case 5 : break;
+			 }
+	   } while(ch<5);
+	}
+     else
+     { cout<<"Username or password is wrong"<<endl;
+       getch();
+     }
+   }
+  void main()
+ { clrscr();
+   int ch;
+   char ch1=1;
+   cout<<"Hi ! Welcome to the Football Teams database"<<ch1<<endl;
+    do
+          { cout<<"1.Admin"<<endl;
+	cout<<"2.Viewer"<<endl;
+	cout<<"3.Exit"<<endl;
+	cout<<"Enter your choice"<<endl;
+	cin>>ch;
+	switch(ch)
+	{ case 1 : admin();
+		   break;
+
+	  case 2 : viewer();
+		   break;
+
+	  case 3:  break;
+	}
+      }while(ch<3);
+   }
+
